@@ -112,7 +112,7 @@ namespace Minio
             DateTime signingDate = DateTime.UtcNow;
             this.SetContentMd5(request);
             this.SetContentSha256(request);
-            this.SetHostHeader(request, client.BaseUrl.Host + ":" + client.BaseUrl.Port);
+            this.SetHostHeader(request, client.BaseUrl);
             this.SetDateHeader(request, signingDate);
             this.SetSessionTokenHeader(request, this.sessionToken);
             SortedDictionary<string, string> headersToSign = this.GetHeadersToSign(request);
@@ -456,9 +456,15 @@ namespace Minio
         /// Set 'Host' http header.
         /// </summary>
         /// <param name="request">Instantiated request object</param>
-        /// <param name="hostUrl">Host url</param>
-        private void SetHostHeader(IRestRequest request, string hostUrl)
+        /// <param name="url">Host url</param>
+        private void SetHostHeader(IRestRequest request, Uri url)
         {
+            var hostUrl = url.Host;
+            if (url.Port != 80)
+            {
+                hostUrl += $":{url.Port}";
+            }
+
             request.AddOrUpdateParameter("Host", hostUrl, ParameterType.HttpHeader);
         }
 
